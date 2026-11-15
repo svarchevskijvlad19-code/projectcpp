@@ -1,0 +1,366 @@
+#include <iostream>
+#include <memory>
+#include <conio.h> 
+#include "basics.h"
+#include "Laptop.h"
+#include "Monitor.h"
+#include "Mouse.h"
+#include "Keyboard.h"
+
+void basics() {
+	std::cout << "OOP Basics" << std::endl;
+
+	LinkedList<Product*> stock;
+
+	stock.add((new Laptop())
+		->setHardware("Intel Core 5, RAM 16GB, SSD 512GB")
+		->setPower(90)
+		->setName("Acer Nitro ")
+		->setPrice(60499));
+
+	stock.add((new Monitor())
+		->setDiagonal(32)
+		->setPower(120)
+		->setName("Dell Vision")
+		->setPrice(7950));
+
+	int N = 2;
+
+	stock.add((new Laptop())
+		->setHardware("AMD Ryzen 5, RAM 16GB, SSD 512GB")
+		->setPower(90)
+		->setName("Dell Inspirion ")
+		->setPrice(60499));
+	N++;
+
+	stock.add((new Mouse())
+		->setDpi(1600)
+		->setconection("USB")
+		->setName("Logitech G102")
+		->setPrice(1200));
+	N++;
+
+	stock.add((new Keyboard())
+		->setType("Mechanical")
+		->setconection("USB")
+		->setName("Hator Skyfall TKL Pro")
+		->setPrice(2499));
+	N++;
+
+	int choice;
+	do {
+		std::cout << "\n=== Main menu ===" << std::endl;
+		std::cout << "Stock has " << N << " products. Select an action:" << std::endl;
+		std::cout << "1. Show all" << std::endl;
+		std::cout << "2. Find by name" << std::endl;
+		std::cout << "3. Find by price" << std::endl;
+		std::cout << "4. Show all from cheap to expensive" << std::endl;
+		std::cout << "5. Show all from expensive to cheap" << std::endl;
+		std::cout << "0. Exit" << std::endl;
+
+		choice = _getch();
+		if (choice == 0 || choice == 224) choice = _getch();
+
+		switch (choice) {
+		case '0':
+			break;
+		case '1':
+			if (N == 0) {
+				std::cout << "Stock is empty! No products to show." << std::endl;
+				break;
+			}
+			for (int i = 0; i < N; ++i) {
+				std::cout << stock[i] << std::endl;
+			}
+			break;
+		case '2': {
+			if (N == 0) {
+				std::cout << "Stock is empty! Cannot search products." << std::endl;
+				break;
+			}
+			std::cout << "Enter name to search: ";
+			std::string searchName;
+			std::cin >> std::ws;
+			std::getline(std::cin, searchName);
+			bool found = false;
+			for (int i = 0; i < N; ++i) {
+				if (stock[i]->getName() == searchName) {
+					std::cout << stock[i] << std::endl;
+					found = true;
+				}
+			}
+			if (!found) {
+				std::cout << "Product not found." << std::endl;
+			}
+			break;
+		}
+		case '3': {
+			if (N == 0) {
+				std::cout << "Stock is empty! Cannot process price range." << std::endl;
+				break;
+			}
+
+			double minStockPrice = stock[0]->getPrice();
+			double maxStockPrice = stock[0]->getPrice();
+
+			for (int i = 1; i < N; ++i) {
+				double currentPrice = stock[i]->getPrice();
+				if (currentPrice < minStockPrice) {
+					minStockPrice = currentPrice;
+				}
+				if (currentPrice > maxStockPrice) {
+					maxStockPrice = currentPrice;
+				}
+			}
+
+			std::cout << "--- Price range in stock: min = " << minStockPrice << " hrn, max = " << maxStockPrice << " hrn ---" << std::endl;
+
+			double minPrice, maxPrice;
+			std::cout << "Enter min price: ";
+			std::cin >> minPrice;
+			std::cout << "Enter max price: ";
+			std::cin >> maxPrice;
+
+			if (minPrice > maxPrice) {
+				double temp = minPrice;
+				minPrice = maxPrice;
+				maxPrice = temp;
+				std::cout << "Note: Min and max prices were swapped because they were reversed." << std::endl;
+			}
+
+			bool found = false;
+			for (int i = 0; i < N; ++i) {
+				if (stock[i]->getPrice() >= minPrice && stock[i]->getPrice() <= maxPrice) {
+					std::cout << stock[i] << std::endl;
+					found = true;
+				}
+			}
+			if (!found) {
+				std::cout << "No product(s) found in this price range." << std::endl;
+			}
+			break;
+		}
+		case '4': {
+			if (N == 0) {
+				std::cout << "Stock is empty!" << std::endl;
+				break;
+			}
+			Product** tempArr = new Product * [N];
+			for (int i = 0; i < N; ++i) {
+				tempArr[i] = stock[i];
+			}
+			for (int i = 0; i < N - 1; ++i) {
+				for (int j = 0; j < N - i - 1; ++j) {
+					if (tempArr[j]->getPrice() > tempArr[j + 1]->getPrice()) {
+						Product* temp = tempArr[j];
+						tempArr[j] = tempArr[j + 1];
+						tempArr[j + 1] = temp;
+					}
+				}
+			}
+			std::cout << "--- Products sorted: Cheap to Expensive ---" << std::endl;
+			for (int i = 0; i < N; ++i) {
+				std::cout << tempArr[i] << std::endl;
+			}
+			delete[] tempArr;
+			break;
+		}
+		case '5': {
+			if (N == 0) {
+				std::cout << "Stock is empty!" << std::endl;
+				break;
+			}
+			Product** tempArr = new Product * [N];
+			for (int i = 0; i < N; ++i) {
+				tempArr[i] = stock[i];
+			}
+			for (int i = 0; i < N - 1; ++i) {
+				for (int j = 0; j < N - i - 1; ++j) {
+					if (tempArr[j]->getPrice() < tempArr[j + 1]->getPrice()) {
+						Product* temp = tempArr[j];
+						tempArr[j] = tempArr[j + 1];
+						tempArr[j + 1] = temp;
+					}
+				}
+			}
+			std::cout << "--- Products sorted: Expensive to Cheap ---" << std::endl;
+			for (int i = 0; i < N; ++i) {
+				std::cout << tempArr[i] << std::endl;
+			}
+			delete[] tempArr;
+			break;
+		}
+		default:
+			std::cout << "Wrong choice" << std::endl;
+			break;
+		}
+	} while (choice != '0');
+}
+
+// 
+// LinkedList<Product*> stock;                   // Перелік покажчиків (stock - статичний об'єкт LinkedList, який вже є)
+// + автоматично знищиться після завершення ф-ції basics() 
+// - весь об'єкт stock розміщується у стеку
+
+// LinkedList<Product*>* stock;					 // Покажчик на перелік покажчиків (stock - покажчик на об'єкт LinkedList, якого ще немає)
+// + економія стекової пам'яті, у стеку тільки адреса
+// - необхідно створити об'єкт: stock = new LinkedList<Product*>();
+//   та не забути видалити (delete stock), оскільки автоматично звільниться 
+//   тільки адреса, а не об'єкт за нею
+
+// LinkedList<std::unique_ptr<Product>> stock;	 // Перелік розумних покажчиків
+// невдалий варіант - як збільшення пам'яті, так і непотрібні розумні покажчики
+
+// std::unique_ptr<LinkedList<Product*>> stock =	 // Розумний покажчик на перелік (у "купі")
+	// std::make_unique<LinkedList<Product*>>();
+// оптимальний варіант - покажчик в середині розумного покажчика та
+// автоматичне видалення після роботи
+
+// LinkedList<Product*>* stock = new LinkedList<Product*>();
+
+// stock.print();  // TODO: перевантажити оператор << для відображення даних
+
+// delete stock;
+
+/* Д.З. Привести клас вектор до відповідності "правилу шести".
+   Реалізувати колекцію (список) з різних векторів у вигляді розумного покажчика.
+   Наповнити колекцію, вивести її на консоль.*/
+   /*
+   void basics_2() {
+	   std::cout << "OOP Basics" << std::endl;
+	   // Поліморфізм - поєднання до єдиного масиву (колекції)
+	   // об'єктів різного типу. Формально, об'єкти мають один
+	   // тип (базового класу), при цьому фактично є об'єктами
+	   // похідних (дочірніх) типів
+
+	   Product* stock[2];
+
+	   stock[0] = (new Laptop())
+		   ->setHardware("Intel Core 5, RAM 16GB, SSD 512GB")
+		   ->setPower(90)
+		   ->setName("Acer Nitro")
+		   ->setPrice(60499);
+
+	   stock[1] = (new Monitor())
+		   ->setDiagonal(32)
+		   ->setPower(120)
+		   ->setName("Dell Vision")
+		   ->setPrice(7950);
+
+	   std::unique_ptr<Product> ptr = std::make_unique<Laptop>(
+		   (new Laptop())
+		   ->setHardware("Intel Core 5, RAM 16GB, SSD 512GB")
+		   ->setPower(90)
+		   ->setName("Acer Nitro")
+		   ->setPrice(60499)
+	   );
+	   // std::unique_ptr<Product> ptr2 = ptr; // помилка, не можна зробити другий покажчик на один об'єкт
+	   std::unique_ptr<Product> ptr2 = std::move(ptr);  // перенести - можна
+
+	   std::shared_ptr<Product> s1 = std::make_shared<Monitor>(
+		   (new Monitor())
+		   ->setDiagonal(32)
+		   ->setPower(120)
+		   ->setName("Dell Vision")
+		   ->setPrice(7950)
+	   );
+	   std::shared_ptr<Product> s2 = s1;   // немає помилки
+
+	   for (auto product : stock) {
+		   std::cout << product->toString() << std::endl;
+	   }
+
+   }
+   */
+   /*
+   Основні принципи ООП.
+   Абстрагування, спадкування, поліморфізм, інкапсуляція.
+
+   Абстракція - термін, що означає поєднання деякої множини сутностей.
+   Приклад - природна мова. Майже будь-яке слово значить множину.
+   "Телефон" - величезна множина реальних речей (сутностей).
+   Машинним мовам абстракція не властива, інструкції мають чітке вираження.
+   Абстрагування - побудова мовних конструкцій, здатних поєднувати
+   множинні властивості (сутності та інші абстракції).
+
+   Створення абстракцій передбачає вивчення (аналіз) предметної області
+   (чому присвячена програма). Наприклад, крамниця. Виписуємо усі товари,
+   що мають бути в крамниці, з усіма їх важливими характеристиками.
+
+   Ноутбук              Монітор            Миша              Клавіатура
+	- назва              - назва            - назва           - назва
+	- ціна               - ціна             - ціна            - ціна
+	- "залізо"           - діагональ        - DPI             - тип
+	- потужність         - потужність       - підключення     - підключення
+
+   1) Знаходимо, що є спільного у ВСІХ сутностей: назва та ціна
+   формуєму вищу абстракію: товар (Product), що поєднує все, що в нас є
+							 Product
+							 - назва    -- інкапсуляція - переміщення спільних
+							 - ціна        властивостей до абстрацій
+			 /           /              \                \
+   Ноутбук              Монітор            Миша              Клавіатура
+	- "залізо"           - діагональ        - DPI             - тип
+	- потужність         - потужність       - підключення     - підключення
+
+   2) Знаходимо групи зі спільними властивостями і будуємо наступний рівень
+   абстракцій:
+	Електротовари (-потужність)     Периферія (-підключення)
+
+							 Product
+						   - назва - ціна
+						 /                \
+			   Електротовари             Периферія
+			   - потужність              - підключення
+			   /         \               /            \
+		   Ноутбук      Монітор         Миша        Клавіатура
+		   - "залізо"   - діагональ     - DPI       - тип
+
+   повторюємо п.2) для всіх можливих групувань
+   ----------------
+   Спадкування - механізм реалізації абстрагування - створення класів на
+   базі інших класів з їх розширенням. Дочірній клас (нащадок) повністю
+   включає в себе батьківський клас і може додавати власні елементи.
+   Спадкування може бути каскадним, тобто Електротовари спадкуються від Товару,
+   а Ноутбук - від Електротовару (а значить і від Товару). Але на відміну
+   від простого розширення, спадкування зберігає типізацію, тобто
+   Ноутбук окрім того, що сам є типом, також є типом Електротовар і Товар.
+
+   Д.З. Обрати предметну галузь для програмування (взяти з прикладів
+   популярних сайтів - форуми, оренда житла/автівок тощо)
+   Виписати основні сутності, провести абстрагування - побудувати
+   ієрархію класів з абстракціями. Основний результат - діаграма класів.
+   -----------------
+   Віртуальні методи
+   Різниця між віртуальними та невіртуальними методами виникає коли тип
+   даних посилання на об'єкт та тип самого об'єкта не є однаковими.
+   (посилання через батьківський тип)
+   Electrical* stock = new Laptop()
+   тип посилання (stock) - Electrical*
+   тип об'єкту - Laptop*
+   Віртуальні методи викликаються у об'єкта
+	 stock->v() -- Laptop::v
+   Невіртуальні методи - за типом даних
+	 stock->nv() -- Electrical::nv
+   Невіртуальні методи створюються за замовчанням,
+   для створення віртуальних необхідно додати оператор "virtual"
+   */
+   /*
+   "Розумні покажчики" (Smart Pointers) - спеціальні конструкції, які дозволяють
+   автоматично контролювати правильне знищення об'єктів. Їх можна розуміти як
+   "оболонки" над об'єктами, які не змінюють правила роботи з ними, але додають
+   спостереження за їх використанням: якщо об'єкт перестає використовуватись, то
+   він знищується.
+   unique_ptr - унікальний покажчик, мається на увазі, що неможна створити
+   другий покажчик на вже створений об'єкт. Якщо потрібно перенести посилання,
+   то слід скористатись std::move. Створюється командою std::make_unique
+   shared_ptr - розподілений покажчик, дозволяє створювати кілька посилань
+   на один об'єкт. Створюється командою std::make_shared
+
+   Ідея роботи в тому, що розумні покажчики насправді не є покажчиками, а є
+   звичайними змінними, що в середині зберігають покажчик. Змінні, що
+   виходять з області видності, видаляються програмою автоматично, тоді як
+   виділена пам'ять (для покажчиків) закріплюється за всією програмою і не
+   керується при виході змінних з областей видності.
+
+   */
